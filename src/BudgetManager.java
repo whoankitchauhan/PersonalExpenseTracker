@@ -7,82 +7,82 @@ import java.util.Scanner;
 public class BudgetManager {
 
     public static void setMonthlyBudget(String username) {
-        Scanner scanner = new Scanner(System.in);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("Enter month (YYYY-MM): ");
+            String month = scanner.nextLine();
 
-        System.out.print("Enter month (YYYY-MM): ");
-        String month = scanner.nextLine();
+            System.out.print("Enter your budget for " + month + ": ₹");
+            double budget = scanner.nextDouble();
 
-        System.out.print("Enter your budget for " + month + ": ₹");
-        double budget = scanner.nextDouble();
+            String sql = "REPLACE INTO budgets (username, month, budget) VALUES (?, ?, ?)";
 
-        String sql = "REPLACE INTO budgets (username, month, budget) VALUES (?, ?, ?)";
+            try (Connection conn = DBConnection.getConnection();
+                    PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, username);
+                stmt.setString(2, month);
+                stmt.setDouble(3, budget);
+                stmt.executeUpdate();
 
-            stmt.setString(1, username);
-            stmt.setString(2, month);
-            stmt.setDouble(3, budget);
-            stmt.executeUpdate();
+                System.out.println("Budget set for " + month + " successfully.");
 
-            System.out.println("Budget set for " + month + " successfully.");
-
-        } catch (SQLException e) {
-            System.out.println("Error setting budget: " + e.getMessage());
+            } catch (SQLException e) {
+                System.out.println("Error setting budget: " + e.getMessage());
+            }
         }
     }
 
     public static void viewBudgetStatus(String username) {
-        Scanner scanner = new Scanner(System.in);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("Enter month to view budget status (YYYY-MM): ");
+            String month = scanner.nextLine();
 
-        System.out.print("Enter month to view budget status (YYYY-MM): ");
-        String month = scanner.nextLine();
+            String budgetSql = "SELECT budget FROM budgets WHERE username = ? AND month = ?";
+            String expenseSql = "SELECT SUM(amount) AS total_spent FROM expenses WHERE username = ? AND DATE_FORMAT(date, '%Y-%m') = ?";
 
-        String budgetSql = "SELECT budget FROM budgets WHERE username = ? AND month = ?";
-        String expenseSql = "SELECT SUM(amount) AS total_spent FROM expenses WHERE username = ? AND DATE_FORMAT(date, '%Y-%m') = ?";
+            try (Connection conn = DBConnection.getConnection()) {
 
-        try (Connection conn = DBConnection.getConnection()) {
+                PreparedStatement budgetStmt = conn.prepareStatement(budgetSql);
+                budgetStmt.setString(1, username);
+                budgetStmt.setString(2, month);
+                ResultSet budgetRs = budgetStmt.executeQuery();
 
-            PreparedStatement budgetStmt = conn.prepareStatement(budgetSql);
-            budgetStmt.setString(1, username);
-            budgetStmt.setString(2, month);
-            ResultSet budgetRs = budgetStmt.executeQuery();
+                if (!budgetRs.next()) {
+                    System.out.println("No budget set for " + month + ". Please set one first.");
+                    return;
+                }
 
-            if (!budgetRs.next()) {
-                System.out.println("No budget set for " + month + ". Please set one first.");
-                return;
+                double budget = budgetRs.getDouble("budget");
+
+                PreparedStatement expenseStmt = conn.prepareStatement(expenseSql);
+                expenseStmt.setString(1, username);
+                expenseStmt.setString(2, month);
+                ResultSet expenseRs = expenseStmt.executeQuery();
+
+                double spent = 0;
+                if (expenseRs.next()) {
+                    spent = expenseRs.getDouble("total_spent");
+                }
+
+                double remaining = budget - spent;
+                double percent = (spent / budget) * 100;
+
+                System.out.printf("Budget: ₹%.2f\n", budget);
+                System.out.printf("Spent: ₹%.2f\n", spent);
+                System.out.printf("Remaining: ₹%.2f\n", remaining);
+                System.out.printf("Usage: %.2f%%\n", percent);
+
+                if (percent > 100) {
+                    System.out.println("You've exceeded your budget!");
+                } else if (percent > 90) {
+                    System.out.println("Warning: You are close to exceeding your budget!");
+                } else {
+                    System.out.println("You're on track with your budget.");
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Error checking budget status: " + e.getMessage());
             }
-
-            double budget = budgetRs.getDouble("budget");
-
-            PreparedStatement expenseStmt = conn.prepareStatement(expenseSql);
-            expenseStmt.setString(1, username);
-            expenseStmt.setString(2, month);
-            ResultSet expenseRs = expenseStmt.executeQuery();
-
-            double spent = 0;
-            if (expenseRs.next()) {
-                spent = expenseRs.getDouble("total_spent");
-            }
-
-            double remaining = budget - spent;
-            double percent = (spent / budget) * 100;
-
-            System.out.printf("Budget: ₹%.2f\n", budget);
-            System.out.printf("Spent: ₹%.2f\n", spent);
-            System.out.printf("Remaining: ₹%.2f\n", remaining);
-            System.out.printf("Usage: %.2f%%\n", percent);
-
-            if (percent > 100) {
-                System.out.println("You've exceeded your budget!");
-            } else if (percent > 90) {
-                System.out.println("Warning: You are close to exceeding your budget!");
-            } else {
-                System.out.println("You're on track with your budget.");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Error checking budget status: " + e.getMessage());
         }
     }
 
