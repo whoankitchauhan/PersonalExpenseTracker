@@ -5,7 +5,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         // Welcome message
         System.out.println("======================================");
-        System.out.println(" Welcome to Daily Expenses Manager ");
+        System.out.println(" Welcome to Daily Expenses Tracker ");
         System.out.println(" Track your money smartly & easily! ");
         System.out.println("======================================");
 

@@ -11,7 +11,7 @@ public class BudgetManager {
             System.out.print("Enter month (YYYY-MM): ");
             String month = scanner.nextLine();
 
-            System.out.print("Enter your budget for " + month + ": ₹");
+            System.out.print("Enter your budget for " + month + ": ");
             double budget = scanner.nextDouble();
 
             String sql = "REPLACE INTO budgets (username, month, budget) VALUES (?, ?, ?)";
@@ -67,9 +67,9 @@ public class BudgetManager {
             double remaining = budget - spent;
             double percent = (spent / budget) * 100;
 
-            System.out.printf("Budget: ₹%.2f\n", budget);
-            System.out.printf("Spent: ₹%.2f\n", spent);
-            System.out.printf("Remaining: ₹%.2f\n", remaining);
+            System.out.printf("Budget: %.2f\n", budget);
+            System.out.printf("Spent: %.2f\n", spent);
+            System.out.printf("Remaining: %.2f\n", remaining);
             System.out.printf("Usage: %.2f%%\n", percent);
 
             if (percent > 100) {
