@@ -14,100 +14,98 @@ import java.sql.ResultSet;
 public class ExpenseManager {
 
     public static void addExpense(String username) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Enter category: ");
-            String category = scanner.nextLine();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter category: ");
+        String category = scanner.nextLine();
 
-            System.out.print("Enter amount: ");
-            double amount = scanner.nextDouble();
-            scanner.nextLine(); // consume newline
+        System.out.print("Enter amount: ");
+        double amount = scanner.nextDouble();
+        scanner.nextLine(); // consume newline
 
-            System.out.print("Enter note: ");
-            String note = scanner.nextLine();
+        System.out.print("Enter note: ");
+        String note = scanner.nextLine();
 
-            LocalDate date = LocalDate.now();
-            LocalTime time = LocalTime.now();
+        LocalDate date = LocalDate.now();
+        LocalTime time = LocalTime.now();
 
-            try (Connection conn = DBConnection.getConnection()) {
-                String sql = "INSERT INTO expenses (username, date, time, category, amount, note) VALUES (?, ?, ?, ?, ?, ?)";
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setString(1, username);
-                stmt.setDate(2, java.sql.Date.valueOf(date));
-                stmt.setTime(3, java.sql.Time.valueOf(time));
-                stmt.setString(4, category);
-                stmt.setDouble(5, amount);
-                stmt.setString(6, note);
+        try (Connection conn = DBConnection.getConnection()) {
+            String sql = "INSERT INTO expenses (username, date, time, category, amount, note) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setDate(2, java.sql.Date.valueOf(date));
+            stmt.setTime(3, java.sql.Time.valueOf(time));
+            stmt.setString(4, category);
+            stmt.setDouble(5, amount);
+            stmt.setString(6, note);
 
-                int rows = stmt.executeUpdate();
-                if (rows > 0) {
-                    System.out.println("Expense added successfully!");
-                }
-            } catch (SQLException e) {
-                System.out.println("Error adding expense: " + e.getMessage());
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                System.out.println("Expense added successfully!");
             }
+        } catch (SQLException e) {
+            System.out.println("Error adding expense: " + e.getMessage());
         }
     }
 
     public static void viewExpenses(String username) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("\n--- View Expenses ---");
-            System.out.println("1. View All Expenses");
-            System.out.println("2. Filter by Category");
-            System.out.println("3. Filter by Date Range");
-            System.out.println("4. Monthly Summary");
-            System.out.println("5. Export to CSV");
-            System.out.println("6. View Charts");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\n--- View Expenses ---");
+        System.out.println("1. View All Expenses");
+        System.out.println("2. Filter by Category");
+        System.out.println("3. Filter by Date Range");
+        System.out.println("4. Monthly Summary");
+        System.out.println("5. Export to CSV");
+        System.out.println("6. View Charts");
 
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+        System.out.print("Enter your choice: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // consume newline
 
-            switch (choice) {
-                case 1:
-                    viewAllExpenses(username);
-                    break;
-                case 2:
-                    System.out.print("Enter category: ");
-                    String category = scanner.nextLine();
-                    viewByCategory(username, category);
-                    break;
-                case 3:
-                    System.out.print("Enter start date (YYYY-MM-DD): ");
-                    String start = scanner.nextLine();
-                    System.out.print("Enter end date (YYYY-MM-DD): ");
-                    String end = scanner.nextLine();
-                    viewByDateRange(username, start, end);
-                    break;
-                case 4:
-                    System.out.println("\n--- Monthly Summary Options ---");
-                    System.out.println("1. View all months summary (VIEW)");
-                    System.out.println("2. View specific month details (STORED PROCEDURE)");
-                    System.out.print("Enter your choice: ");
-                    int summaryChoice = scanner.nextInt();
-                    scanner.nextLine(); // consume newline
+        switch (choice) {
+            case 1:
+                viewAllExpenses(username);
+                break;
+            case 2:
+                System.out.print("Enter category: ");
+                String category = scanner.nextLine();
+                viewByCategory(username, category);
+                break;
+            case 3:
+                System.out.print("Enter start date (YYYY-MM-DD): ");
+                String start = scanner.nextLine();
+                System.out.print("Enter end date (YYYY-MM-DD): ");
+                String end = scanner.nextLine();
+                viewByDateRange(username, start, end);
+                break;
+            case 4:
+                System.out.println("\n--- Monthly Summary Options ---");
+                System.out.println("1. View all months summary (VIEW)");
+                System.out.println("2. View specific month details (STORED PROCEDURE)");
+                System.out.print("Enter your choice: ");
+                int summaryChoice = scanner.nextInt();
+                scanner.nextLine(); // consume newline
 
-                    switch (summaryChoice) {
-                        case 1:
-                            viewMonthlySummaryUsingView(username); // View
-                            break;
-                        case 2:
-                            ExpenseManager.viewMonthlyDetailsUsingProcedure(username); // Procedure (no 'month' here)
-                            break;
-                        default:
-                            System.out.println("Invalid choice.");
-                    }
-                    break;
+                switch (summaryChoice) {
+                    case 1:
+                        viewMonthlySummaryUsingView(username); // View
+                        break;
+                    case 2:
+                        ExpenseManager.viewMonthlyDetailsUsingProcedure(username); // Procedure (no 'month' here)
+                        break;
+                    default:
+                        System.out.println("Invalid choice.");
+                }
+                break;
 
-                case 5:
-                    exportToCSV(username);
-                    break;
-                case 6:
-                    showChartMenu(username);
-                    break;
+            case 5:
+                exportToCSV(username);
+                break;
+            case 6:
+                showChartMenu(username);
+                break;
 
-                default:
-                    System.out.println("Invalid choice.");
-            }
+            default:
+                System.out.println("Invalid choice.");
         }
     }
 
@@ -182,55 +180,54 @@ public class ExpenseManager {
     }
 
     public static void viewMonthlyDetailsUsingProcedure(String username) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Enter month (YYYY-MM): ");
-            String month = scanner.nextLine();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter month (YYYY-MM): ");
+        String month = scanner.nextLine();
 
-            String call = "{CALL get_user_monthly_summary(?, ?)}";
+        String call = "{CALL get_user_monthly_summary(?, ?)}";
 
-            try (Connection conn = DBConnection.getConnection();
-                    CallableStatement stmt = (CallableStatement) conn.prepareCall(call)) {
+        try (Connection conn = DBConnection.getConnection();
+                CallableStatement stmt = (CallableStatement) conn.prepareCall(call)) {
 
-                stmt.setString(1, username);
-                stmt.setString(2, month);
-                ResultSet rs = stmt.executeQuery();
+            stmt.setString(1, username);
+            stmt.setString(2, month);
+            ResultSet rs = stmt.executeQuery();
 
-                System.out.println("\n--- Detailed Expenses for " + month + " ---");
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String category = rs.getString("category");
-                    double amount = rs.getDouble("amount");
-                    String note = rs.getString("note");
-                    Date date = rs.getDate("date");
+            System.out.println("\n--- Detailed Expenses for " + month + " ---");
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String category = rs.getString("category");
+                double amount = rs.getDouble("amount");
+                String note = rs.getString("note");
+                Date date = rs.getDate("date");
 
-                    System.out.printf("ID: %d | Category: %s | Amount: %.2f | Note: %s | Date: %s\n",
-                            id, category, amount, note, date.toString());
-                }
-
-            } catch (SQLException e) {
-                System.out.println("❌ Error calling procedure: " + e.getMessage());
+                System.out.printf("ID: %d | Category: %s | Amount: %.2f | Note: %s | Date: %s\n",
+                        id, category, amount, note, date.toString());
             }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Error calling procedure: " + e.getMessage());
         }
+
     }
 
     private static void showChartMenu(String username) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("\n--- Chart Options ---");
-            System.out.println("1. Expense Distribution by Category (Pie Chart)");
-            System.out.println("2. Monthly Expense Summary (Bar Chart)");
-            System.out.print("Enter your choice: ");
-            int chartChoice = scanner.nextInt();
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\n--- Chart Options ---");
+        System.out.println("1. Expense Distribution by Category (Pie Chart)");
+        System.out.println("2. Monthly Expense Summary (Bar Chart)");
+        System.out.print("Enter your choice: ");
+        int chartChoice = scanner.nextInt();
 
-            switch (chartChoice) {
-                case 1:
-                    ChartManager.showCategoryPieChart(username);
-                    break;
-                case 2:
-                    ChartManager.showMonthlyBarChart(username);
-                    break;
-                default:
-                    System.out.println("Invalid chart option.");
-            }
+        switch (chartChoice) {
+            case 1:
+                ChartManager.showCategoryPieChart(username);
+                break;
+            case 2:
+                ChartManager.showMonthlyBarChart(username);
+                break;
+            default:
+                System.out.println("Invalid chart option.");
         }
     }
 
@@ -248,148 +245,148 @@ public class ExpenseManager {
     }
 
     public static void deleteExpense(String username) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            // Show all expenses before asking for ID
-            try (Connection conn = DBConnection.getConnection()) {
-                String fetchSql = "SELECT * FROM expenses WHERE username = ? ORDER BY date DESC, time DESC";
-                PreparedStatement fetchStmt = conn.prepareStatement(fetchSql);
-                fetchStmt.setString(1, username);
-                ResultSet rs = fetchStmt.executeQuery();
+        Scanner scanner = new Scanner(System.in);
+        // Show all expenses before asking for ID
+        try (Connection conn = DBConnection.getConnection()) {
+            String fetchSql = "SELECT * FROM expenses WHERE username = ? ORDER BY date DESC, time DESC";
+            PreparedStatement fetchStmt = conn.prepareStatement(fetchSql);
+            fetchStmt.setString(1, username);
+            ResultSet rs = fetchStmt.executeQuery();
 
-                System.out.println("\n--- Your Recent Expenses ---");
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String date = rs.getString("date");
-                    String time = rs.getString("time");
-                    String category = rs.getString("category");
-                    double amount = rs.getDouble("amount");
-                    String note = rs.getString("note");
+            System.out.println("\n--- Your Recent Expenses ---");
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String date = rs.getString("date");
+                String time = rs.getString("time");
+                String category = rs.getString("category");
+                double amount = rs.getDouble("amount");
+                String note = rs.getString("note");
 
-                    System.out.printf("ID: %d | %s %s | %.2f | %s | %s\n",
-                            id, date, time, amount, category, note);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error fetching expenses: " + e.getMessage());
-                return;
+                System.out.printf("ID: %d | %s %s | %.2f | %s | %s\n",
+                        id, date, time, amount, category, note);
             }
-
-            // Now ask for the ID to delete
-            System.out.print("\nEnter the ID of the expense to delete: ");
-            int idToDelete = scanner.nextInt();
-
-            try (Connection conn = DBConnection.getConnection()) {
-                String deleteSql = "DELETE FROM expenses WHERE id = ? AND username = ?";
-                PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
-                deleteStmt.setInt(1, idToDelete);
-                deleteStmt.setString(2, username);
-
-                int rows = deleteStmt.executeUpdate();
-                if (rows > 0) {
-                    System.out.println("Expense deleted successfully.");
-                } else {
-                    System.out.println("No such expense found for this user.");
-                }
-            } catch (SQLException e) {
-                System.out.println("Error deleting expense: " + e.getMessage());
-            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching expenses: " + e.getMessage());
+            return;
         }
+
+        // Now ask for the ID to delete
+        System.out.print("\nEnter the ID of the expense to delete: ");
+        int idToDelete = scanner.nextInt();
+
+        try (Connection conn = DBConnection.getConnection()) {
+            String deleteSql = "DELETE FROM expenses WHERE id = ? AND username = ?";
+            PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
+            deleteStmt.setInt(1, idToDelete);
+            deleteStmt.setString(2, username);
+
+            int rows = deleteStmt.executeUpdate();
+            if (rows > 0) {
+                System.out.println("Expense deleted successfully.");
+            } else {
+                System.out.println("No such expense found for this user.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error deleting expense: " + e.getMessage());
+        }
+
     }
 
     public static void updateExpense(String username) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            // Show recent expenses
-            try (Connection conn = DBConnection.getConnection()) {
-                String fetchSql = "SELECT * FROM expenses WHERE username = ? ORDER BY date DESC, time DESC";
-                PreparedStatement fetchStmt = conn.prepareStatement(fetchSql);
-                fetchStmt.setString(1, username);
-                ResultSet rs = fetchStmt.executeQuery();
+        Scanner scanner = new Scanner(System.in);
+        // Show recent expenses
+        try (Connection conn = DBConnection.getConnection()) {
+            String fetchSql = "SELECT * FROM expenses WHERE username = ? ORDER BY date DESC, time DESC";
+            PreparedStatement fetchStmt = conn.prepareStatement(fetchSql);
+            fetchStmt.setString(1, username);
+            ResultSet rs = fetchStmt.executeQuery();
 
-                System.out.println("\n--- Your Recent Expenses ---");
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String date = rs.getString("date");
-                    String time = rs.getString("time");
-                    String category = rs.getString("category");
-                    double amount = rs.getDouble("amount");
-                    String note = rs.getString("note");
+            System.out.println("\n--- Your Recent Expenses ---");
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String date = rs.getString("date");
+                String time = rs.getString("time");
+                String category = rs.getString("category");
+                double amount = rs.getDouble("amount");
+                String note = rs.getString("note");
 
-                    System.out.printf("ID: %d | %s %s | %.2f | %s | %s\n",
-                            id, date, time, amount, category, note);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error fetching expenses: " + e.getMessage());
-                return;
+                System.out.printf("ID: %d | %s %s | %.2f | %s | %s\n",
+                        id, date, time, amount, category, note);
             }
-
-            // Ask for ID to update
-            System.out.print("\nEnter the ID of the expense to update: ");
-            int id = scanner.nextInt();
-            scanner.nextLine(); // consume newline
-
-            // Fetch current values for the selected ID
-            String currentCategory = "";
-            double currentAmount = 0;
-            String currentNote = "";
-
-            try (Connection conn = DBConnection.getConnection()) {
-                String sql = "SELECT category, amount, note FROM expenses WHERE id = ? AND username = ?";
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setInt(1, id);
-                stmt.setString(2, username);
-                ResultSet rs = stmt.executeQuery();
-
-                if (rs.next()) {
-                    currentCategory = rs.getString("category");
-                    currentAmount = rs.getDouble("amount");
-                    currentNote = rs.getString("note");
-
-                    System.out.println("\n--- Current Details ---");
-                    System.out.println("Category: " + currentCategory);
-                    System.out.println("Amount  : " + currentAmount);
-                    System.out.println("Note    : " + currentNote);
-                } else {
-                    System.out.println("No such expense found for this user.");
-                    return;
-                }
-            } catch (SQLException e) {
-                System.out.println("Error retrieving expense details: " + e.getMessage());
-                return;
-            }
-
-            // Ask for new values
-            System.out.print("Enter new category (leave blank to keep current): ");
-            String categoryInput = scanner.nextLine();
-            String newCategory = categoryInput.isEmpty() ? currentCategory : categoryInput;
-
-            System.out.print("Enter new amount (or -1 to keep current): ");
-            double amountInput = scanner.nextDouble();
-            scanner.nextLine(); // consume newline
-            double newAmount = amountInput < 0 ? currentAmount : amountInput;
-
-            System.out.print("Enter new note (leave blank to keep current): ");
-            String noteInput = scanner.nextLine();
-            String newNote = noteInput.isEmpty() ? currentNote : noteInput;
-
-            // Perform update
-            try (Connection conn = DBConnection.getConnection()) {
-                String updateSql = "UPDATE expenses SET category = ?, amount = ?, note = ? WHERE id = ? AND username = ?";
-                PreparedStatement stmt = conn.prepareStatement(updateSql);
-                stmt.setString(1, newCategory);
-                stmt.setDouble(2, newAmount);
-                stmt.setString(3, newNote);
-                stmt.setInt(4, id);
-                stmt.setString(5, username);
-
-                int rows = stmt.executeUpdate();
-                if (rows > 0) {
-                    System.out.println("Expense updated successfully.");
-                } else {
-                    System.out.println("No changes were made.");
-                }
-            } catch (SQLException e) {
-                System.out.println("Error updating expense: " + e.getMessage());
-            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching expenses: " + e.getMessage());
+            return;
         }
+
+        // Ask for ID to update
+        System.out.print("\nEnter the ID of the expense to update: ");
+        int id = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        // Fetch current values for the selected ID
+        String currentCategory = "";
+        double currentAmount = 0;
+        String currentNote = "";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            String sql = "SELECT category, amount, note FROM expenses WHERE id = ? AND username = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            stmt.setString(2, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                currentCategory = rs.getString("category");
+                currentAmount = rs.getDouble("amount");
+                currentNote = rs.getString("note");
+
+                System.out.println("\n--- Current Details ---");
+                System.out.println("Category: " + currentCategory);
+                System.out.println("Amount  : " + currentAmount);
+                System.out.println("Note    : " + currentNote);
+            } else {
+                System.out.println("No such expense found for this user.");
+                return;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving expense details: " + e.getMessage());
+            return;
+        }
+
+        // Ask for new values
+        System.out.print("Enter new category (leave blank to keep current): ");
+        String categoryInput = scanner.nextLine();
+        String newCategory = categoryInput.isEmpty() ? currentCategory : categoryInput;
+
+        System.out.print("Enter new amount (or -1 to keep current): ");
+        double amountInput = scanner.nextDouble();
+        scanner.nextLine(); // consume newline
+        double newAmount = amountInput < 0 ? currentAmount : amountInput;
+
+        System.out.print("Enter new note (leave blank to keep current): ");
+        String noteInput = scanner.nextLine();
+        String newNote = noteInput.isEmpty() ? currentNote : noteInput;
+
+        // Perform update
+        try (Connection conn = DBConnection.getConnection()) {
+            String updateSql = "UPDATE expenses SET category = ?, amount = ?, note = ? WHERE id = ? AND username = ?";
+            PreparedStatement stmt = conn.prepareStatement(updateSql);
+            stmt.setString(1, newCategory);
+            stmt.setDouble(2, newAmount);
+            stmt.setString(3, newNote);
+            stmt.setInt(4, id);
+            stmt.setString(5, username);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                System.out.println("Expense updated successfully.");
+            } else {
+                System.out.println("No changes were made.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error updating expense: " + e.getMessage());
+        }
+
     }
 
     private static void exportToCSV(String username) {
